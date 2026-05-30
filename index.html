@@ -3,58 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>20 Option Spinner Wheel</title>
+<title>Spinner Wheel V2</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: #f5f5f5;
-    margin: 20px;
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    background:#f5f5f5;
+    margin:15px;
 }
 
-h1 {
-    color: #333;
+h1{
+    margin-bottom:10px;
 }
 
-.pointer {
-    font-size: 40px;
-    color: red;
-    margin-bottom: -15px;
+textarea{
+    width:90%;
+    max-width:500px;
+    height:120px;
+    padding:10px;
+    font-size:16px;
 }
 
-#wheel {
-    transition: transform 5s ease-out;
-    max-width: 100%;
+.pointer{
+    font-size:42px;
+    color:red;
+    margin-bottom:-15px;
 }
 
-button {
-    padding: 12px 30px;
-    font-size: 18px;
-    border: none;
-    border-radius: 8px;
-    background: #2196F3;
-    color: white;
-    cursor: pointer;
-    margin-top: 20px;
+#wheel{
+    transition:transform 5s cubic-bezier(.17,.67,.18,1);
+    max-width:100%;
 }
 
-button:hover {
-    background: #1976D2;
+button{
+    padding:12px 28px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    background:#1976D2;
+    color:white;
+    cursor:pointer;
+    margin-top:10px;
 }
 
-#result {
-    margin-top: 25px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #222;
+#result{
+    font-size:30px;
+    font-weight:bold;
+    margin-top:20px;
 }
 </style>
 </head>
-
 <body>
 
-<h1>🎡 20 Option Spinner</h1>
+<h1>🎡 Spinner Wheel V2</h1>
+
+<p>Enter one option per line (up to 20)</p>
+
+<textarea id="optionsBox">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</textarea>
+
+<br><br>
 
 <div class="pointer">▼</div>
 
@@ -67,112 +94,142 @@ button:hover {
 <div id="result"></div>
 
 <script>
-const options = [
-    "1","2","3","4","5",
-    "6","7","8","9","10",
-    "11","12","13","14","15",
-    "16","17","18","19","20"
-];
-
-const colors = [
-    "#FF5722","#4CAF50","#2196F3","#FFC107",
-    "#9C27B0","#00BCD4","#E91E63","#8BC34A",
-    "#FF9800","#3F51B5","#795548","#009688",
-    "#673AB7","#CDDC39","#F44336","#03A9F4",
-    "#FFEB3B","#607D8B","#8E24AA","#43A047"
-];
 
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 
-const centerX = 250;
-const centerY = 250;
+const center = 250;
 const radius = 250;
 
-const arc = (2 * Math.PI) / options.length;
+let rotation = 0;
+let spinning = false;
 
-function drawWheel() {
+const colors = [
+"#F44336","#4CAF50","#2196F3","#FFC107",
+"#9C27B0","#00BCD4","#E91E63","#8BC34A",
+"#FF9800","#3F51B5","#795548","#009688",
+"#673AB7","#CDDC39","#FF5722","#03A9F4",
+"#FFEB3B","#607D8B","#9C27B0","#4CAF50"
+];
 
-    for (let i = 0; i < options.length; i++) {
+function getOptions(){
+
+    let arr =
+    document.getElementById("optionsBox")
+    .value
+    .split("\n")
+    .map(x=>x.trim())
+    .filter(x=>x!="");
+
+    return arr.slice(0,20);
+}
+
+function drawWheel(){
+
+    const options = getOptions();
+
+    ctx.clearRect(0,0,500,500);
+
+    const arc = (2*Math.PI)/options.length;
+
+    for(let i=0;i<options.length;i++){
 
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
+        ctx.moveTo(center,center);
 
-        ctx.fillStyle = colors[i];
+        ctx.fillStyle =
+        colors[i % colors.length];
 
         ctx.arc(
-            centerX,
-            centerY,
+            center,
+            center,
             radius,
-            i * arc,
-            (i + 1) * arc
+            i*arc,
+            (i+1)*arc
         );
 
-        ctx.closePath();
         ctx.fill();
 
         ctx.save();
 
-        ctx.translate(centerX, centerY);
-        ctx.rotate(i * arc + arc / 2);
+        ctx.translate(center,center);
+        ctx.rotate(i*arc + arc/2);
 
-        ctx.fillStyle = "white";
-        ctx.font = "bold 18px Arial";
-        ctx.textAlign = "center";
+        ctx.fillStyle="white";
+        ctx.font="bold 18px Arial";
+        ctx.textAlign="center";
 
-        ctx.fillText(options[i], 180, 6);
+        ctx.fillText(
+            options[i],
+            radius-70,
+            5
+        );
 
         ctx.restore();
     }
 
-    // center circle
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 35, 0, 2 * Math.PI);
-    ctx.fillStyle = "#ffffff";
+    ctx.arc(center,center,35,0,2*Math.PI);
+    ctx.fillStyle="white";
     ctx.fill();
-    ctx.strokeStyle = "#333";
     ctx.stroke();
 }
 
 drawWheel();
 
-let currentRotation = 0;
-let spinning = false;
+document
+.getElementById("optionsBox")
+.addEventListener("input",drawWheel);
 
-function spin() {
+function spin(){
 
-    if (spinning) return;
+    if(spinning) return;
+
+    const options = getOptions();
+
+    if(options.length < 2){
+        alert("Enter at least 2 options");
+        return;
+    }
 
     spinning = true;
 
-    const winnerIndex =
-        Math.floor(Math.random() * options.length);
+    const extraRotation =
+        1800 + Math.random()*360;
 
-    const degreesPerSlice =
-        360 / options.length;
-
-    const targetAngle =
-        360 -
-        (winnerIndex * degreesPerSlice) -
-        (degreesPerSlice / 2);
-
-    currentRotation +=
-        1800 + targetAngle;
+    rotation += extraRotation;
 
     canvas.style.transform =
-        `rotate(${currentRotation}deg)`;
+        `rotate(${rotation}deg)`;
 
-    document.getElementById("result").innerHTML = "";
+    document.getElementById("result").innerHTML="";
 
-    setTimeout(() => {
+    setTimeout(()=>{
+
+        const normalized =
+        ((rotation % 360)+360)%360;
+
+        const slice =
+        360/options.length;
+
+        const pointerAngle =
+        (360-normalized)%360;
+
+        let index =
+        Math.floor(pointerAngle/slice);
+
+        index =
+        (index + options.length)
+        % options.length;
 
         document.getElementById("result").innerHTML =
-            "🎉 Result: " + options[winnerIndex];
+        "🎉 Result: " + options[index];
 
         spinning = false;
 
-    }, 5000);
+    },5000);
 }
+
 </script>
 
 </body>
