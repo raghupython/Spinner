@@ -3,107 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spinner Wheel V2</title>
-
+<title>20 Option Spinner</title>
 <style>
 body{
     font-family:Arial,sans-serif;
     text-align:center;
     background:#f5f5f5;
-    margin:15px;
+    margin:20px;
 }
-
-h1{
-    margin-bottom:10px;
-}
-
-textarea{
-    width:90%;
-    max-width:500px;
-    height:120px;
-    padding:10px;
-    font-size:16px;
-}
-
 .pointer{
     font-size:42px;
     color:red;
     margin-bottom:-15px;
 }
-
 #wheel{
-    transition:transform 5s cubic-bezier(.17,.67,.18,1);
-    max-width:100%;
+    transition:transform 5s ease-out;
 }
-
 button{
-    padding:12px 28px;
+    padding:12px 30px;
     font-size:18px;
     border:none;
     border-radius:8px;
     background:#1976D2;
     color:white;
     cursor:pointer;
-    margin-top:10px;
+    margin-top:20px;
 }
-
 #result{
+    margin-top:20px;
     font-size:30px;
     font-weight:bold;
-    margin-top:20px;
 }
 </style>
 </head>
 <body>
-
-<h1>🎡 Spinner Wheel V2</h1>
-
-<p>Enter one option per line (up to 20)</p>
-
-<textarea id="optionsBox">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20</textarea>
-
-<br><br>
-
+<h1>🎡 20 Option Spinner</h1>
 <div class="pointer">▼</div>
-
 <canvas id="wheel" width="500" height="500"></canvas>
-
 <br>
-
 <button onclick="spin()">SPIN</button>
-
 <div id="result"></div>
-
 <script>
-
-const canvas = document.getElementById("wheel");
-const ctx = canvas.getContext("2d");
-
-const center = 250;
-const radius = 250;
-
-let rotation = 0;
-let spinning = false;
-
+const options = [
+"1","2","3","4","5",
+"6","7","8","9","10",
+"11","12","13","14","15",
+"16","17","18","19","20"
+];
 const colors = [
 "#F44336","#4CAF50","#2196F3","#FFC107",
 "#9C27B0","#00BCD4","#E91E63","#8BC34A",
@@ -111,35 +57,18 @@ const colors = [
 "#673AB7","#CDDC39","#FF5722","#03A9F4",
 "#FFEB3B","#607D8B","#9C27B0","#4CAF50"
 ];
-
-function getOptions(){
-
-    let arr =
-    document.getElementById("optionsBox")
-    .value
-    .split("\n")
-    .map(x=>x.trim())
-    .filter(x=>x!="");
-
-    return arr.slice(0,20);
-}
-
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const center = 250;
+const radius = 250;
+let rotation = 0;
+let spinning = false;
 function drawWheel(){
-
-    const options = getOptions();
-
-    ctx.clearRect(0,0,500,500);
-
     const arc = (2*Math.PI)/options.length;
-
     for(let i=0;i<options.length;i++){
-
         ctx.beginPath();
         ctx.moveTo(center,center);
-
-        ctx.fillStyle =
-        colors[i % colors.length];
-
+        ctx.fillStyle = colors[i % colors.length];
         ctx.arc(
             center,
             center,
@@ -147,90 +76,54 @@ function drawWheel(){
             i*arc,
             (i+1)*arc
         );
-
+        ctx.closePath();
         ctx.fill();
-
         ctx.save();
-
         ctx.translate(center,center);
         ctx.rotate(i*arc + arc/2);
-
         ctx.fillStyle="white";
         ctx.font="bold 18px Arial";
         ctx.textAlign="center";
-
         ctx.fillText(
             options[i],
             radius-70,
             5
         );
-
         ctx.restore();
     }
-
     ctx.beginPath();
     ctx.arc(center,center,35,0,2*Math.PI);
     ctx.fillStyle="white";
     ctx.fill();
     ctx.stroke();
 }
-
 drawWheel();
-
-document
-.getElementById("optionsBox")
-.addEventListener("input",drawWheel);
-
 function spin(){
-
     if(spinning) return;
-
-    const options = getOptions();
-
-    if(options.length < 2){
-        alert("Enter at least 2 options");
-        return;
-    }
-
     spinning = true;
-
-    const extraRotation =
-        1800 + Math.random()*360;
-
-    rotation += extraRotation;
-
+    const extraSpin = 1800 + Math.random()*360;
+    rotation += extraSpin;
     canvas.style.transform =
         `rotate(${rotation}deg)`;
-
     document.getElementById("result").innerHTML="";
-
     setTimeout(()=>{
-
         const normalized =
-        ((rotation % 360)+360)%360;
-
-        const slice =
-        360/options.length;
-
+            ((rotation % 360) + 360) % 360;
+        const sliceSize =
+            360 / options.length;
+        // Correct for top pointer (12 o'clock)
         const pointerAngle =
-        (360-normalized)%360;
-
-        let index =
-        Math.floor(pointerAngle/slice);
-
-        index =
-        (index + options.length)
-        % options.length;
-
+            (450 - normalized) % 360;
+        let winnerIndex =
+            Math.floor(pointerAngle / sliceSize);
+        winnerIndex =
+            (winnerIndex + options.length)
+            % options.length;
         document.getElementById("result").innerHTML =
-        "🎉 Result: " + options[index];
-
+            "🎉 Result: " + options[winnerIndex];
         spinning = false;
-
     },5000);
 }
-
 </script>
-
 </body>
 </html>
