@@ -4,52 +4,72 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>20 Option Spinner</title>
+
 <style>
-body{
-    font-family:Arial,sans-serif;
-    text-align:center;
-    background:#f5f5f5;
-    margin:20px;
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f5f5f5;
+    margin: 20px;
 }
-.pointer{
-    font-size:42px;
-    color:red;
-    margin-bottom:-15px;
+
+h1 {
+    color: #333;
 }
-#wheel{
-    transition:transform 5s ease-out;
+
+.pointer {
+    font-size: 42px;
+    color: red;
+    margin-bottom: -20px;
 }
-button{
-    padding:12px 30px;
-    font-size:18px;
-    border:none;
-    border-radius:8px;
-    background:#1976D2;
-    color:white;
-    cursor:pointer;
-    margin-top:20px;
+
+#wheel {
+    display: block;
+    margin: auto;
+    transition: transform 5s ease-out;
 }
-#result{
-    margin-top:20px;
-    font-size:30px;
-    font-weight:bold;
+
+button {
+    padding: 12px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    background: #1976D2;
+    color: white;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#result {
+    margin-top: 25px;
+    font-size: 32px;
+    font-weight: bold;
 }
 </style>
 </head>
 <body>
+
 <h1>🎡 20 Option Spinner</h1>
+
 <div class="pointer">▼</div>
+
 <canvas id="wheel" width="500" height="500"></canvas>
+
 <br>
+
 <button onclick="spin()">SPIN</button>
+
 <div id="result"></div>
+
 <script>
+
 const options = [
 "1","2","3","4","5",
 "6","7","8","9","10",
 "11","12","13","14","15",
 "16","17","18","19","20"
 ];
+
 const colors = [
 "#F44336","#4CAF50","#2196F3","#FFC107",
 "#9C27B0","#00BCD4","#E91E63","#8BC34A",
@@ -57,73 +77,102 @@ const colors = [
 "#673AB7","#CDDC39","#FF5722","#03A9F4",
 "#FFEB3B","#607D8B","#9C27B0","#4CAF50"
 ];
+
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
+
 const center = 250;
 const radius = 250;
-let rotation = 0;
+
+let currentRotation = 0;
 let spinning = false;
-function drawWheel(){
-    const arc = (2*Math.PI)/options.length;
-    for(let i=0;i<options.length;i++){
+
+function drawWheel() {
+
+    const arc = (2 * Math.PI) / options.length;
+
+    for (let i = 0; i < options.length; i++) {
+
         ctx.beginPath();
-        ctx.moveTo(center,center);
+        ctx.moveTo(center, center);
+
         ctx.fillStyle = colors[i % colors.length];
+
         ctx.arc(
             center,
             center,
             radius,
-            i*arc,
-            (i+1)*arc
+            i * arc - Math.PI / 2,
+            (i + 1) * arc - Math.PI / 2
         );
+
         ctx.closePath();
         ctx.fill();
+
         ctx.save();
-        ctx.translate(center,center);
-        ctx.rotate(i*arc + arc/2);
-        ctx.fillStyle="white";
-        ctx.font="bold 18px Arial";
-        ctx.textAlign="center";
+
+        ctx.translate(center, center);
+        ctx.rotate(i * arc + arc / 2 - Math.PI / 2);
+
+        ctx.fillStyle = "white";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
+
         ctx.fillText(
             options[i],
-            radius-70,
+            radius - 70,
             5
         );
+
         ctx.restore();
     }
+
     ctx.beginPath();
-    ctx.arc(center,center,35,0,2*Math.PI);
-    ctx.fillStyle="white";
+    ctx.arc(center, center, 35, 0, 2 * Math.PI);
+    ctx.fillStyle = "#fff";
     ctx.fill();
+    ctx.strokeStyle = "#333";
     ctx.stroke();
 }
+
 drawWheel();
-function spin(){
-    if(spinning) return;
+
+function spin() {
+
+    if (spinning) return;
+
     spinning = true;
-    const extraSpin = 1800 + Math.random()*360;
-    rotation += extraSpin;
+
+    const winnerIndex =
+        Math.floor(Math.random() * options.length);
+
+    const sliceSize = 360 / options.length;
+
+    const targetAngle =
+        360 -
+        (winnerIndex * sliceSize) -
+        (sliceSize / 2);
+
+    currentRotation +=
+        1800 +
+        targetAngle;
+
     canvas.style.transform =
-        `rotate(${rotation}deg)`;
-    document.getElementById("result").innerHTML="";
-    setTimeout(()=>{
-        const normalized =
-            ((rotation % 360) + 360) % 360;
-        const sliceSize =
-            360 / options.length;
-        // Correct for top pointer (12 o'clock)
-        const pointerAngle =
-            (450 - normalized) % 360;
-        let winnerIndex =
-            Math.floor(pointerAngle / sliceSize);
-        winnerIndex =
-            (winnerIndex + options.length)
-            % options.length;
+        `rotate(${currentRotation}deg)`;
+
+    document.getElementById("result").innerHTML = "";
+
+    setTimeout(() => {
+
         document.getElementById("result").innerHTML =
             "🎉 Result: " + options[winnerIndex];
+
         spinning = false;
-    },5000);
+
+    }, 5000);
 }
+
 </script>
+
 </body>
 </html>
